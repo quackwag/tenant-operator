@@ -1,0 +1,44 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-added-large-files
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.0
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 26.10.1
+    hooks:
+      - id: black
+
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1-1
+    hooks:
+      - id: shellcheck
+
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.109.2
+    hooks:
+      - id: terraform_fmt
+      - id: terraform_validate
+
+  - repo: local
+    hooks:
+      - id: trivy-config
+        name: trivy config scan
+        entry: trivy config --misconfig-scanners kubernetes,terraform,dockerfile --exit-code 1 --severity HIGH,CRITICAL --skip-dirs "**/.venv" .
+        language: system
+        pass_filenames: false
+        files: \.(ya?ml|tf)$|Dockerfile$
+      - id: kubeconform
+        name: kubeconform
+        entry: kubeconform -strict -summary -ignore-missing-schemas
+        language: system
+        files: ^(crds|examples|deploy)/.*\.ya?ml$

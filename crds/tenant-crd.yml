@@ -1,0 +1,206 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: tenants.platform.tenancy.io
+spec:
+  group: platform.tenancy.io
+  scope: Cluster
+  names:
+    kind: Tenant
+    plural: tenants
+    singular: tenant
+    shortNames: [tnt]
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    subresources:
+      status: {}
+    additionalPrinterColumns:
+      - name: Tier
+        type: string
+        jsonPath: .spec.tier
+      - name: Ready
+        type: string
+        jsonPath: .status.conditions[?(@.type=="Ready")].status
+      - name: Age
+        type: date
+        jsonPath: .metadata.creationTimestamp
+    schema:
+      openAPIV3Schema:
+        type: object
+        required: [spec]
+        x-kubernetes-validations:
+        - rule: self.metadata.name.size() <= 56
+          message: Tenant name must be 56 characters or less (tenant-<name>).
+        properties:
+          spec:
+            type: object
+            description: Desired state of the tenant, written by the team requesting it.
+            required: [owners, tier]
+            properties:
+              owners:
+                type: array
+                description: Email addresses of the people who get admin access to the tenant's namespace.
+                minItems: 1
+                maxItems: 10
+                items:
+                  type: string
+                  format: email
+                  maxLength: 254
+              members:
+                type: array
+                description: Email addresses of the people who get edit access (deploy and change workloads, not RBAC).
+                maxItems: 50
+                items:
+                  type: string
+                  format: email
+                  maxLength: 254
+              viewers:
+                type: array
+                description: Email addresses of the people who get read-only access (no secrets).
+                maxItems: 50
+                items:
+                  type: string
+                  format: email
+                  maxLength: 254
+              tier:
+                type: string
+                description: Preset size. Sets the default CPU and memory quota (small, medium or large).
+                enum: [small, medium, large]
+              resources:
+                type: object
+                description: Optional override of the tier's quota. Capped at 16 CPU and 64Gi memory.
+                properties:
+                  cpu:
+                    type: string
+                    description: Total CPU the namespace may request, e.g. "4" or "500m".
+                    maxLength: 16
+                    x-kubernetes-validations:
+                    - rule: isQuantity(self) && quantity(self).isGreaterThan(quantity('0'))
+                      message: cpu must be a positive quantity, e.g. 4 or 500m
+                    - rule: '!isQuantity(self) || !quantity(self).isGreaterThan(quantity(''16''))'
+                      message: cpu cannot exceed 16
+                  memory:
+                    type: string
+                    description: Total memory the namespace may request, e.g. "8Gi" or "512Mi".
+                    maxLength: 16
+                    x-kubernetes-validations:
+                    - rule: isQuantity(self) && quantity(self).isGreaterThan(quantity('0'))
+                      message: memory must be a positive quantity, e.g. 8Gi or 512Mi
+                    - rule: '!isQuantity(self) || !quantity(self).isGreaterThan(quantity(''64Gi''))'
+                      message: memory cannot exceed 64Gi
+              network:
+                type: object
+                description: Traffic allowed in and out. Default deny.
+                properties:
+                  ingress:
+                    type: array
+                    description: Sources allowed to reach this tenant's pods.
+                    maxItems: 20
+                    items:
+                      type: object
+                      description: Exactly one of cidr or tenant, plus the ports to allow.
+                      maxProperties: 2
+                      required: [ports]
+                      x-kubernetes-validations:
+                      - rule: has(self.cidr) != has(self.tenant)
+                        message: set exactly one of cidr or tenant
+                      properties:
+                        cidr:
+                          type: string
+                          format: cidr
+                          description: IPv4 range outside the cluster, e.g. 10.5.0.0/16. Must be /16-32.
+                          maxLength: 43
+                          x-kubernetes-validations:
+                          - rule: '!self.contains('':'')'
+                            message: only IPv4 ranges are supported
+                          - rule: self.contains('/') && int(self.split('/')[1]) >= 16
+                            message: cidr must be /16-32 (0.0.0.0/0 is not allowed)
+                        tenant:
+                          type: string
+                          description: Name of another Tenant in the cluster.
+                          maxLength: 56
+                          pattern: ^[a-z0-9-]+$
+                          x-kubernetes-validations:
+                            - rule: "!self.startsWith('-') && !self.endsWith('-')"
+                              message: must not start or end with a dash
+                        ports:
+                          type: array
+                          description: Ports to allow. Traffic on any other port is denied.
+                          minItems: 1
+                          maxItems: 10
+                          items:
+                            type: object
+                            required: [port]
+                            properties:
+                              port:
+                                type: integer
+                                minimum: 1
+                                maximum: 65535
+                              protocol:
+                                type: string
+                                enum: [TCP, UDP]
+                                default: TCP
+                  egress:
+                    type: array
+                    description: Destinations this tenant's pods may reach.
+                    maxItems: 20
+                    items:
+                      type: object
+                      description: Exactly one of cidr or tenant, plus the ports to allow.
+                      maxProperties: 2
+                      required: [ports]
+                      x-kubernetes-validations:
+                      - rule: has(self.cidr) != has(self.tenant)
+                        message: set exactly one of cidr or tenant
+                      properties:
+                        cidr:
+                          type: string
+                          format: cidr
+                          description: IPv4 range outside the cluster, e.g. 10.5.0.0/16. Must be /16-32.
+                          maxLength: 43
+                          x-kubernetes-validations:
+                          - rule: '!self.contains('':'')'
+                            message: only IPv4 ranges are supported
+                          - rule: self.contains('/') && int(self.split('/')[1]) >= 16
+                            message: cidr must be /16-32 (0.0.0.0/0 is not allowed)
+                        tenant:
+                          type: string
+                          description: Name of another Tenant in the cluster.
+                          maxLength: 56
+                          pattern: ^[a-z0-9-]+$
+                          x-kubernetes-validations:
+                            - rule: "!self.startsWith('-') && !self.endsWith('-')"
+                              message: must not start or end with a dash
+                        ports:
+                          type: array
+                          description: Ports to allow. Traffic on any other port is denied.
+                          minItems: 1
+                          maxItems: 10
+                          items:
+                            type: object
+                            required: [port]
+                            properties:
+                              port:
+                                type: integer
+                                minimum: 1
+                                maximum: 65535
+                              protocol:
+                                type: string
+                                enum: [TCP, UDP]
+                                default: TCP
+              aws:
+                type: object
+                description: AWS resources created for the tenant, scoped to its own IAM role.
+                properties:
+                  s3Buckets:
+                    type: array
+                    description: Bucket names to create. Each is prefixed with tenant-<name>.
+                    maxItems: 1
+                    items:
+                      type: string
+                      pattern: '^[a-z0-9-]{3,40}$'
+          status:
+            type: object
+            x-kubernetes-preserve-unknown-fields: true

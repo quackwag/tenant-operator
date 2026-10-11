@@ -1,0 +1,5 @@
+GROUP = "platform.tenancy.io"
+VERSION = "v1alpha1"
+PLURAL = "tenants"
+TENANT_LABEL = f"{GROUP}/tenant"
+NAMESPACE_PREFIX = "tenant-"
