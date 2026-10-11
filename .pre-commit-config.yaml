@@ -42,3 +42,9 @@ repos:
         entry: kubeconform -strict -summary -ignore-missing-schemas
         language: system
         files: ^(crds|examples|deploy)/.*\.ya?ml$
+      - id: mypy
+        name: mypy
+        entry: mypy --config-file python/pyproject.toml python/src
+        language: system
+        pass_filenames: false
+        types: [python]

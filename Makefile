@@ -16,4 +16,4 @@ lint:
 	pre-commit run --all-files
 
 test:
-	pytest python/tests/
+	pytest python/tests/unit -v

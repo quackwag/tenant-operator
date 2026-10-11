@@ -1,13 +1,15 @@
+from typing import Any
+
 import kopf
+from kubernetes import config
+
+# import aws
 from const import GROUP, PLURAL, VERSION
 from k8s import namespace  # network, quota, rbac
 
-# import aws
-from kubernetes import config
-
 
 @kopf.on.startup()
-def load_config(logger, **kwargs):
+def load_config(logger: kopf.Logger, **kwargs: Any) -> None:
     try:
         config.load_incluster_config()
     except config.ConfigException:
@@ -19,7 +21,9 @@ def load_config(logger, **kwargs):
 @kopf.on.update(GROUP, VERSION, PLURAL)
 @kopf.on.resume(GROUP, VERSION, PLURAL)
 @kopf.timer(GROUP, VERSION, PLURAL, interval=60)
-def reconcile(body, spec, logger, **kwargs):
+def reconcile(
+    body: kopf.Body, spec: kopf.Spec, logger: kopf.Logger, **kwargs: Any
+) -> None:
     namespace.ensure(body, logger)
     # quota.ensure(ns, spec, logger)
     # network.ensure(ns, spec, logger)
