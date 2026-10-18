@@ -84,7 +84,7 @@ spec:
                   memory:
                     type: string
                     description: Total memory the namespace may request, e.g. "8Gi" or "512Mi".
-                    maxLength: 16
+                    maxLength: 64
                     x-kubernetes-validations:
                     - rule: isQuantity(self) && quantity(self).isGreaterThan(quantity('0'))
                       message: memory must be a positive quantity, e.g. 8Gi or 512Mi

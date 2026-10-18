@@ -1,0 +1,70 @@
+{
+  "apiVersion": "platform.tenancy.io/v1alpha1",
+  "kind": "Tenant",
+  "metadata": {
+    "name": "payments"
+  },
+  "spec": {
+    "owners": [
+      "alice@example.com"
+    ],
+    "members": [
+      "bob@example.com"
+    ],
+    "viewers": [
+      "carol@example.com"
+    ],
+    "tier": "small",
+    "resources": {
+      "cpu": "6",
+      "memory": "12Gi"
+    },
+    "network": {
+      "ingress": [
+        {
+          "tenant": "frontend",
+          "ports": [
+            {
+              "port": 8080
+            }
+          ]
+        }
+      ],
+      "egress": [
+        {
+          "cidr": "10.0.5.0/24",
+          "ports": [
+            {
+              "port": 5432
+            },
+            {
+              "port": 6379
+            }
+          ]
+        },
+        {
+          "cidr": "10.0.0.2/32",
+          "ports": [
+            {
+              "port": 53,
+              "protocol": "UDP"
+            }
+          ]
+        },
+        {
+          "tenant": "billing",
+          "ports": [
+            {
+              "port": 8443
+            }
+          ]
+        }
+      ]
+    },
+    "aws": {
+      "s3Buckets": [
+        "statements"
+      ]
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "small": {
+    "requests.cpu": "2",
+    "requests.memory": "4Gi",
+    "requests.storage": "5Gi",
+    "persistentvolumeclaims": "5",
+    "pods": "20",
+    "services.loadbalancers": "0",
+    "services.nodeports": "0"
+  },
+  "medium": {
+    "requests.cpu": "4",
+    "requests.memory": "8Gi",
+    "requests.storage": "10Gi",
+    "persistentvolumeclaims": "5",
+    "pods": "50",
+    "services.loadbalancers": "0",
+    "services.nodeports": "0"
+  },
+  "large": {
+    "requests.cpu": "8",
+    "requests.memory": "16Gi",
+    "requests.storage": "15Gi",
+    "persistentvolumeclaims": "5",
+    "pods": "100",
+    "services.loadbalancers": "0",
+    "services.nodeports": "0"
+  }
+}
