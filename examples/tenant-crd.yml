@@ -100,12 +100,12 @@ spec:
                     maxItems: 20
                     items:
                       type: object
-                      description: Exactly one of cidr or tenant, plus the ports to allow.
+                      description: Exactly one of cidr, tenant or namespace, plus the ports to allow.
                       maxProperties: 2
                       required: [ports]
                       x-kubernetes-validations:
-                      - rule: has(self.cidr) != has(self.tenant)
-                        message: set exactly one of cidr or tenant
+                      - rule: "[has(self.cidr), has(self.tenant), has(self.__namespace__)].filter(x, x).size() == 1"
+                        message: set exactly one of cidr, tenant or namespace
                       properties:
                         cidr:
                           type: string
@@ -121,6 +121,14 @@ spec:
                           type: string
                           description: Name of another Tenant in the cluster.
                           maxLength: 56
+                          pattern: ^[a-z0-9-]+$
+                          x-kubernetes-validations:
+                            - rule: "!self.startsWith('-') && !self.endsWith('-')"
+                              message: must not start or end with a dash
+                        namespace:
+                          type: string
+                          description: Name of a non-tenant namespace in the cluster, e.g. monitoring.
+                          maxLength: 63
                           pattern: ^[a-z0-9-]+$
                           x-kubernetes-validations:
                             - rule: "!self.startsWith('-') && !self.endsWith('-')"
@@ -148,12 +156,12 @@ spec:
                     maxItems: 20
                     items:
                       type: object
-                      description: Exactly one of cidr or tenant, plus the ports to allow.
+                      description: Exactly one of cidr, tenant or namespace, plus the ports to allow.
                       maxProperties: 2
                       required: [ports]
                       x-kubernetes-validations:
-                      - rule: has(self.cidr) != has(self.tenant)
-                        message: set exactly one of cidr or tenant
+                      - rule: "[has(self.cidr), has(self.tenant), has(self.__namespace__)].filter(x, x).size() == 1"
+                        message: set exactly one of cidr, tenant or namespace
                       properties:
                         cidr:
                           type: string
@@ -169,6 +177,14 @@ spec:
                           type: string
                           description: Name of another Tenant in the cluster.
                           maxLength: 56
+                          pattern: ^[a-z0-9-]+$
+                          x-kubernetes-validations:
+                            - rule: "!self.startsWith('-') && !self.endsWith('-')"
+                              message: must not start or end with a dash
+                        namespace:
+                          type: string
+                          description: Name of a non-tenant namespace in the cluster, e.g. monitoring.
+                          maxLength: 63
                           pattern: ^[a-z0-9-]+$
                           x-kubernetes-validations:
                             - rule: "!self.startsWith('-') && !self.endsWith('-')"

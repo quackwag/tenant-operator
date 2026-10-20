@@ -15,3 +15,7 @@ REQUIRED_KEYS = {
 }
 LIMIT_DEFAULT_REQUEST = {"cpu": "100m", "memory": "128Mi"}
 LIMIT_DEFAULT = {"cpu": "500m", "memory": "512Mi"}
+NETWORK_POLICY_NAME = "tenant-network"
+NAMESPACE_NAME_LABEL = "kubernetes.io/metadata.name"
+DNS_NAMESPACE = {NAMESPACE_NAME_LABEL: "kube-system"}
+DNS_POD = {"k8s-app": "kube-dns"}
