@@ -92,7 +92,7 @@ spec:
                       message: memory cannot exceed 64Gi
               network:
                 type: object
-                description: Traffic allowed in and out. Default deny.
+                description: Traffic allowed in and out. Ingress is same-namespace only unless listed here. Egress is open unless egress rules are set.
                 properties:
                   ingress:
                     type: array
