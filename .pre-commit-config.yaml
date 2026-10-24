@@ -34,7 +34,7 @@ repos:
     hooks:
       - id: trivy-config
         name: trivy config scan
-        entry: trivy config --misconfig-scanners kubernetes,terraform,dockerfile --exit-code 1 --severity HIGH,CRITICAL --skip-dirs "**/.venv" .
+        entry: trivy config --ignorefile .trivyignore.yaml --misconfig-scanners kubernetes,terraform,dockerfile --exit-code 1 --severity HIGH,CRITICAL --skip-dirs "**/.venv" .
         language: system
         pass_filenames: false
         files: \.(ya?ml|tf)$|Dockerfile$

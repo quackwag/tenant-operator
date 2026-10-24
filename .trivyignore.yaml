@@ -1,0 +1,10 @@
+misconfigurations:
+  - id: KSV-0041
+    paths: ["deploy/tenant-admin.yaml", "deploy/tenant-edit.yaml"]
+    statement: Only bound via namespaced RoleBindings. Secrets are the tenant's own.
+  - id: KSV-0053
+    paths: ["deploy/tenant-admin.yaml", "deploy/tenant-edit.yaml"]
+    statement: Only bound via namespaced RoleBindings. Exec into own pods is intended.
+  - id: KSV-0056
+    paths: ["deploy/tenant-admin.yaml", "deploy/tenant-edit.yaml"]
+    statement: Only bound via namespaced RoleBindings. tenants manage own services/ingresses. networkpolicies write removed.
