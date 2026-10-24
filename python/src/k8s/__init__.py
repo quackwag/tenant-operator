@@ -18,7 +18,7 @@ def networking() -> client.NetworkingV1Api:
 
 
 @cache
-def rbac() -> client.RbacAuthorizationV1Api:
+def rbac_api() -> client.RbacAuthorizationV1Api:
     return client.RbacAuthorizationV1Api()
 
 

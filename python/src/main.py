@@ -7,7 +7,7 @@ from kubernetes import config
 
 # import aws
 from const import GROUP, PLURAL, REQUIRED_KEYS, REQUIRED_TIERS, VERSION
-from k8s import namespace, network, quota  # rbac
+from k8s import namespace, network, quota, rbac
 
 
 @kopf.on.startup()
@@ -53,7 +53,7 @@ def reconcile(
     ns = namespace.ensure(body, logger)
     quota.ensure(ns, spec, memo.tiers, logger, tenant=name)
     network.ensure(ns, spec, logger, tenant=name)
-    # rbac.ensure(ns, spec, logger)
+    rbac.ensure(ns, spec, logger, tenant=name)
     # aws.ensure(body, spec, logger)
 
 

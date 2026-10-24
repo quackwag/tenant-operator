@@ -19,3 +19,9 @@ NETWORK_POLICY_NAME = "tenant-network"
 NAMESPACE_NAME_LABEL = "kubernetes.io/metadata.name"
 DNS_NAMESPACE = {NAMESPACE_NAME_LABEL: "kube-system"}
 DNS_POD = {"k8s-app": "kube-dns"}
+BINDING_ROLE_NAME = "tenant-binding"
+BINDING_ROLE_MAP = {
+    "owners": "tenant-admin",
+    "members": "tenant-edit",
+    "viewers": "view",
+}
