@@ -3,6 +3,10 @@ VERSION = "v1alpha1"
 PLURAL = "tenants"
 TENANT_LABEL = f"{GROUP}/tenant"
 NAMESPACE_PREFIX = "tenant-"
+PSA_LABELS = {
+    "pod-security.kubernetes.io/enforce": "baseline",
+    "pod-security.kubernetes.io/warn": "restricted",
+}
 REQUIRED_TIERS = {"small", "medium", "large"}
 REQUIRED_KEYS = {
     "requests.cpu",
