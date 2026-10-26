@@ -220,3 +220,13 @@ spec:
           status:
             type: object
             x-kubernetes-preserve-unknown-fields: true
+            properties:
+              conditions:
+                type: object
+                required: [type, status]
+                properties:
+                  type: {type: string}
+                  status: {type: string, enum: ["True", "False", "unknown"]}
+                  reason: {type: string}
+                  message: {type: string}
+                  lastTransitionTime: {type: string, format: date-time}

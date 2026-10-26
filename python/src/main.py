@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import UTC, datetime
 from typing import Any
 
 import kopf
@@ -47,16 +48,52 @@ def reconcile(
     spec: kopf.Spec,
     name: str,
     memo: kopf.Memo,
+    patch: kopf.Patch,
     logger: kopf.Logger,
     **kwargs: Any,
 ) -> None:
-    ns = namespace.ensure(body, logger)
-    quota.ensure(ns, spec, memo.tiers, logger, tenant=name)
-    network.ensure(ns, spec, logger, tenant=name)
-    rbac.ensure(ns, spec, logger, tenant=name)
-    # aws.ensure(body, spec, logger)
+    conditions: list[dict[str, str]] = []
+
+    try:
+        ns = namespace.ensure(body, logger)
+        conditions.append(_condition("NamespaceReady", True))
+    except Exception as e:
+        conditions.append(_condition("NamespaceReady", False, str(e)))
+        conditions.append(_condition("Ready", False, "Namespace failed"))
+        patch.status["conditions"] = conditions
+        raise
+
+    failed: list[str] = []
+    for type_, step in [
+        ("QuotaReady", lambda: quota.ensure(ns, spec, memo.tiers, logger, tenant=name)),
+        ("NetworkReady", lambda: network.ensure(ns, spec, logger, tenant=name)),
+        ("RBACReady", lambda: rbac.ensure(ns, spec, logger, tenant=name)),
+        # aws.ensure(body, spec, logger)
+    ]:
+        try:
+            step()  # type: ignore[no-untyped-call]
+            conditions.append(_condition(type_, True))
+        except Exception as e:
+            logger.exception("%s failed", type_)
+            conditions.append(_condition(type_, False, str(e)))
+            failed.append(type_)
+
+    conditions.append(_condition("Ready", not failed, ", ".join(failed)))
+    patch.status["conditions"] = conditions
+    if failed:
+        raise kopf.TemporaryError(f"Failed: {', '.join(failed)}", delay=30)
 
 
 # @kopf.on.delete(GROUP, VERSION, PLURAL)
 # def delete_tenant(body, **kwargs):
 # aws.delete(body)
+
+
+def _condition(type_: str, ok: bool, message: str = "") -> dict[str, str]:
+    return {
+        "type": type_,
+        "status": "True" if ok else "False",
+        "reason": "Reconciled" if ok else "Failed",
+        "message": message,
+        "lastTransitionTime": datetime.now(UTC).isoformat(),
+    }
